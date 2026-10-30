@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <h2>Your account</h2>
+  <p>You are logged in.</p>
+</div>
+<div class="panel">
+  <p><b>Name:</b> {{ user.display_name }}</p>
+  <p><b>Username:</b> {{ user.username }}</p>
+  <p><b>Account type:</b> <span class="badge">{{ 'Department officer' if user.role == 'officer' else 'Citizen' }}</span></p>
+  <form method="post" action="{{ url_for('logout') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="secondary block">Log out</button>
+  </form>
+</div>
+{% endblock %}

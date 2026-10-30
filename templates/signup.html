@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-bg auth-hero">
+  <div class="panel auth-card">
+    <h2>Create your account</h2>
+    <p class="hint">Citizens report problems. Department officers review and close them.</p>
+    <form method="post" action="{{ url_for('signup') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="role">I am a</label>
+      <select name="role" id="role">
+        <option value="citizen" {{ 'selected' if form.get('role', 'citizen') == 'citizen' }}>Citizen</option>
+        <option value="officer" {{ 'selected' if form.get('role') == 'officer' }}>Department officer</option>
+      </select>
+      <div id="code_box" style="display:none">
+        <label for="officer_code">Officer access code</label>
+        <input name="officer_code" id="officer_code" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <small>Given to you by your department. Citizens do not need this.</small>
+      </div>
+      <label for="display_name">Your name</label>
+      <input name="display_name" id="display_name" autocomplete="name" value="{{ form.get('display_name', '') }}" required>
+      <label for="username">Username</label>
+      <input name="username" id="username" autocomplete="username" autocapitalize="none" spellcheck="false" value="{{ form.get('username', '') }}" required>
+      <small>3 to 30 characters: letters, numbers, dot, dash or underscore.</small>
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" autocomplete="new-password" minlength="8" required>
+      <small>At least 8 characters.</small>
+      <label class="check"><input type="checkbox" id="show_pw"> Show password</label>
+      <button type="submit" class="block">Create account</button>
+    </form>
+    <p class="switch">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+  </div>
+</section>
+<script>
+  const role = document.getElementById("role"), box = document.getElementById("code_box");
+  function syncRole() { box.style.display = role.value === "officer" ? "block" : "none"; }
+  role.addEventListener("change", syncRole); syncRole();
+  document.getElementById("show_pw").addEventListener("change", e => {
+    document.getElementById("password").type = e.target.checked ? "text" : "password";
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <h2>File a complaint</h2>
+  <p>Tell us what is wrong, then take a live photo at the spot.</p>
+</div>
+<form method="post" enctype="multipart/form-data" class="panel">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="category">Category</label>
+  <select name="category" id="category">{% for c in categories %}<option>{{ c }}</option>{% endfor %}</select>
+  <label for="description">What is the problem?</label>
+  <textarea name="description" id="description" rows="3" required placeholder="For example: a deep pothole near the market gate"></textarea>
+  {% include "_capture.html" %}
+  <button type="submit" class="block">Submit complaint</button>
+</form>
+{% endblock %}

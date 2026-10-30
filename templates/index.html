@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+{% set labels = {
+  'open': 'Open',
+  'resolved_claimed': 'Department says resolved',
+  'after_submitted': 'After-photo received',
+  'verified': 'Verified fixed',
+  'not_fixed': 'Not fixed',
+  'unclear': 'Unclear'} %}
+{% set step_of = {'open': 1, 'resolved_claimed': 2, 'after_submitted': 3, 'unclear': 3, 'not_fixed': 3, 'verified': 4} %}
+{% set icons = {'Pothole': '🛣️', 'Streetlight': '💡', 'Garbage': '🗑️', 'Water supply': '💧'} %}
+
+<section class="hero hero-bg">
+  <h2>{% if user.role == 'officer' %}All complaints{% else %}Hi, {{ user.display_name }}{% endif %}</h2>
+  <p>{% if user.role == 'officer' %}Complaints filed by citizens. Resolved ones wait for the citizen’s proof.{% else %}Your complaints. When a department says one is resolved, show us it’s fixed.{% endif %}</p>
+</section>
+
+<div class="stats">
+  <div class="stat"><b>{{ stats.total }}</b><span>Complaints</span></div>
+  <div class="stat"><b>{{ stats.claimed }}</b><span>Marked resolved by department</span></div>
+  <div class="stat good"><b>{{ stats.verified }}</b><span>Verified by ClosureCheck</span></div>
+  <div class="stat flag"><b>{{ stats.flagged }}</b><span>Flagged (unclear / not fixed)</span></div>
+</div>
+
+{% for c in complaints %}
+{% set st = c.status %}
+{% set step = step_of.get(st, 1) %}
+<article class="card">
+  <div class="card-photos {{ 'two' if c.after_photo }}">
+    <figure class="photo">
+      <img src="{{ url_for('static', filename='uploads/' + c.before_photo) }}" alt="Before photo for complaint {{ c.id }}">
+      <figcaption>Before</figcaption>
+    </figure>
+    {% if c.after_photo %}
+    <figure class="photo">
+      <img src="{{ url_for('static', filename='uploads/' + c.after_photo) }}" alt="After photo for complaint {{ c.id }}">
+      <figcaption>After</figcaption>
+    </figure>
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <div class="card-top">
+      <div class="cat">{{ icons.get(c.category, '📍') }} {{ c.category }} <small>#{{ c.id }}</small></div>
+      <span class="badge {{ 'good' if st == 'verified' else 'bad' if st in ('not_fixed', 'unclear') else 'claimed' if st == 'resolved_claimed' else 'pending' if st == 'after_submitted' }}">{{ labels.get(st, st) }}</span>
+    </div>
+    <p class="desc">{{ c.description }}</p>
+    <div class="meta">📍 {{ c.lat }}, {{ c.lon }} · Filed {{ c.created_at.replace('T', ' ') }}</div>
+    {% if user.role == 'officer' %}<div class="meta">Filed by {{ c.filer if c.filer else 'an earlier entry' }}</div>{% endif %}
+    <div class="meta">Before: {{ 'live camera' if c.before_mode == 'camera' else 'uploaded file' }}{% if c.after_photo %} · After: {{ 'live camera' if c.after_mode == 'camera' else 'uploaded file' }}{% endif %}</div>
+
+    <ol class="steps" aria-label="Progress of complaint {{ c.id }}">
+      {% for label in ['Filed', 'Marked resolved', 'After-photo', 'Checked'] %}
+      <li class="{{ 'done' if loop.index <= step }}{{ ' flag' if st in ('not_fixed', 'unclear') and loop.index == step }}{{ ' final-ok' if st == 'verified' and loop.index == 4 }}">{{ label }}</li>
+      {% endfor %}
+    </ol>
+
+    {% if c.verification_note %}<div class="note"><b>Check:</b> {{ c.verification_note }}</div>{% endif %}
+    {% if st == 'resolved_claimed' and user.role == 'citizen' %}
+    <a class="btn block" href="{{ url_for('after', complaint_id=c.id) }}">Upload after-photo</a>
+    {% endif %}
+  </div>
+</article>
+{% else %}
+<div class="empty">
+  <div class="big">🌸</div>
+  <h3>No complaints yet</h3>
+  {% if user.role == 'citizen' %}
+  <p>Report a problem with a live photo and it will appear here.</p>
+  <a class="btn" href="{{ url_for('new_complaint') }}">File your first complaint</a>
+  {% else %}
+  <p>When citizens report problems, they will appear here.</p>
+  {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

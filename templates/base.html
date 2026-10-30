@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ClosureCheck</title>
+  <meta name="theme-color" content="#12141a">
+  <meta name="color-scheme" content="dark">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ClosureCheck">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% set ep = request.endpoint %}
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="{{ url_for('index') }}" aria-label="ClosureCheck home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </span>
+        <span class="brand-name">ClosureCheck</span>
+        <span class="brand-tag">“Resolved” should mean fixed</span>
+      </a>
+      <nav class="desk-nav" aria-label="Main">
+        {% if user %}
+          <a href="{{ url_for('index') }}" class="{{ 'active' if ep == 'index' }}">Complaints</a>
+          {% if user.role == 'citizen' %}
+          <a href="{{ url_for('new_complaint') }}" class="{{ 'active' if ep == 'new_complaint' }}">New complaint</a>
+          {% else %}
+          <a href="{{ url_for('admin') }}" class="{{ 'active' if ep == 'admin' }}">Department</a>
+          {% endif %}
+          <a href="{{ url_for('account') }}" class="{{ 'active' if ep == 'account' }}">{{ user.display_name }} <span class="role-chip">{{ user.role }}</span></a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="{{ 'active' if ep == 'login' }}">Log in</a>
+          <a href="{{ url_for('signup') }}" class="{{ 'active' if ep == 'signup' }}">Sign up</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% for m in get_flashed_messages() %}<div class="flash" role="status">{{ m }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <nav class="tabbar" aria-label="Main">
+    {% if user %}
+    <a href="{{ url_for('index') }}" class="{{ 'active' if ep == 'index' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      Complaints
+    </a>
+    {% if user.role == 'citizen' %}
+    <a href="{{ url_for('new_complaint') }}" class="{{ 'active' if ep == 'new_complaint' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+      New
+    </a>
+    {% else %}
+    <a href="{{ url_for('admin') }}" class="{{ 'active' if ep == 'admin' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/><path d="M9 14l2 2 4-4"/></svg>
+      Department
+    </a>
+    {% endif %}
+    <a href="{{ url_for('account') }}" class="{{ 'active' if ep == 'account' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      Account
+    </a>
+    {% else %}
+    <a href="{{ url_for('index') }}" class="{{ 'active' if ep == 'index' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      Home
+    </a>
+    <a href="{{ url_for('login') }}" class="{{ 'active' if ep == 'login' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4"/><path d="M10 17l5-5-5-5M15 12H3"/></svg>
+      Log in
+    </a>
+    <a href="{{ url_for('signup') }}" class="{{ 'active' if ep == 'signup' }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6M19 8v6M16 11h6"/></svg>
+      Sign up
+    </a>
+    {% endif %}
+  </nav>
+
+  <script>
+    if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/sw.js").catch(() => {}); }
+  </script>
+</body>
+</html>

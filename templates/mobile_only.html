@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="gate">
+  <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="18" y="6" width="28" height="52" rx="6" fill="none"/>
+    <path d="M28 12h8"/><circle cx="32" cy="50" r="2" fill="currentColor"/>
+    <path d="M25 30l5 5 9-10" stroke="#5ee0a0" stroke-width="4"/>
+  </svg>
+  <h2>Please open this on your phone</h2>
+  <p>ClosureCheck needs a <b>live camera photo</b> and your <b>real GPS location</b> to prove that a problem
+     is really fixed. A laptop or desktop can’t do that reliably, so this page only works on a mobile phone.</p>
+  <p>Open this same link in your phone’s browser:</p>
+  <p class="link">{{ request.host_url }}</p>
+  <p><small>Government officers can still use a laptop for the department view and the dashboard.</small></p>
+  <a class="btn" href="{{ url_for('index') }}">Go to complaints list</a>
+</div>
+{% endblock %}

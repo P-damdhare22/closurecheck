@@ -1,0 +1,101 @@
+{# Location + photo block shared by the "new complaint" and "after-photo" pages #}
+{% if live_only %}
+  <input type="hidden" name="capture_token" value="{{ token }}">
+  <input type="hidden" name="capture_mode" id="capture_mode" value="">
+
+  <label>Live photo (camera only)</label>
+  <ol class="cam-steps" aria-label="Steps">
+    <li id="step1"><span class="n">1</span> Open the camera</li>
+    <li id="step2"><span class="n">2</span> Take the photo</li>
+    <li id="step3"><span class="n">3</span> Location captured automatically</li>
+    <li id="step4"><span class="n">4</span> Submit</li>
+  </ol>
+
+  <div class="cam-frame">
+    <video id="cam" autoplay playsinline muted></video>
+    <img id="preview" alt="Your photo" style="display:none">
+    <div class="placeholder" id="cam_placeholder">Camera is off<br><small>Press “Open camera” to start</small></div>
+  </div>
+  <canvas id="snap" style="display:none"></canvas>
+  <div class="cam-actions">
+    <button type="button" class="secondary" onclick="startCamera()">Open camera</button>
+    <button type="button" onclick="takePhoto()">Take photo</button>
+  </div>
+  <input type="file" name="{{ photo_field }}" id="photo_input" style="display:none">
+  <small id="cam_status">Photos must be taken live. Your location is read from your phone when you take the photo.</small>
+
+  <div class="row">
+    <div><label for="lat">Latitude</label><input name="lat" id="lat" readonly placeholder="filled from your phone" required></div>
+    <div><label for="lon">Longitude</label><input name="lon" id="lon" readonly placeholder="filled from your phone" required></div>
+  </div>
+{% else %}
+  <div class="row">
+    <div><label for="lat">Latitude</label><input name="lat" id="lat" required></div>
+    <div><label for="lon">Longitude</label><input name="lon" id="lon" required></div>
+  </div>
+  <button type="button" class="secondary" onclick="useMyLocation()">Use my location</button><br>
+  <small>Demo mode: you can type coordinates and upload any photo (for testing only).</small>
+  <label for="photo_demo">Photo (JPG/PNG)</label>
+  <input type="file" name="{{ photo_field }}" id="photo_demo" accept="image/*" required>
+{% endif %}
+
+<script>
+let stream = null;
+const statusEl = document.getElementById("cam_status");
+
+function setStatus(msg) { if (statusEl) statusEl.textContent = msg; }
+function markStep(n) { const el = document.getElementById("step" + n); if (el) el.classList.add("done"); }
+
+function getLocation(onDone) {
+  if (!navigator.geolocation) { alert("Location is not supported in this browser."); return; }
+  navigator.geolocation.getCurrentPosition(
+    p => { lat.value = p.coords.latitude.toFixed(6); lon.value = p.coords.longitude.toFixed(6);
+           setStatus("Photo taken. Location captured (accuracy about " + Math.round(p.coords.accuracy) + " m).");
+           markStep(3); if (onDone) onDone(); },
+    () => alert("Could not get your location. Please allow location access and take the photo again."),
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+function useMyLocation() { getLocation(); }
+
+async function startCamera() {
+  if (!window.isSecureContext || !navigator.mediaDevices) {
+    alert("The camera only works on a secure (https) link. Open the https address of this app on your phone.");
+    return;
+  }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+    cam.srcObject = stream;
+    const ph = document.getElementById("cam_placeholder"); if (ph) ph.style.display = "none";
+    preview.style.display = "none";
+    markStep(1);
+    setStatus("Camera is on. Point it at the spot and press Take photo.");
+  } catch (e) {
+    alert("Could not open the camera. Please allow camera access (the page must be opened on localhost or https).");
+  }
+}
+
+function takePhoto() {
+  if (!stream || !cam.videoWidth) { alert("Please open the camera first."); return; }
+  snap.width = cam.videoWidth; snap.height = cam.videoHeight;
+  snap.getContext("2d").drawImage(cam, 0, 0);
+  snap.toBlob(blob => {
+    const dt = new DataTransfer();
+    dt.items.add(new File([blob], "live.jpg", { type: "image/jpeg" }));
+    photo_input.files = dt.files;
+    preview.src = URL.createObjectURL(blob);
+    preview.style.display = "block";
+    capture_mode.value = "camera";
+    markStep(2);
+    getLocation(() => markStep(4));
+  }, "image/jpeg", 0.9);
+}
+
+document.querySelector("form").addEventListener("submit", e => {
+  const live = !!document.getElementById("capture_mode");
+  if (live && (!photo_input.files.length || !lat.value || !lon.value)) {
+    e.preventDefault();
+    alert("Please take a live photo and allow location access first.");
+  }
+});
+</script>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <h2>Department view</h2>
+  <p>Open complaints. Marking one “resolved” is what departments do on portals today. ClosureCheck then asks the citizen for proof.</p>
+</div>
+{% set icons = {'Pothole': '🛣️', 'Streetlight': '💡', 'Garbage': '🗑️', 'Water supply': '💧'} %}
+{% for c in complaints %}
+<article class="card">
+  <div class="card-photos">
+    <figure class="photo">
+      <img src="{{ url_for('static', filename='uploads/' + c.before_photo) }}" alt="Before photo for complaint {{ c.id }}">
+      <figcaption>Before</figcaption>
+    </figure>
+  </div>
+  <div class="card-body">
+    <div class="card-top">
+      <div class="cat">{{ icons.get(c.category, '📍') }} {{ c.category }} <small>#{{ c.id }}</small></div>
+      <span class="badge pending">Open</span>
+    </div>
+    <p class="desc">{{ c.description }}</p>
+    <div class="meta">📍 {{ c.lat }}, {{ c.lon }}</div>
+    <form method="post" action="{{ url_for('resolve', complaint_id=c.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="block">Mark resolved</button>
+    </form>
+  </div>
+</article>
+{% else %}
+<div class="empty">
+  <div class="big">✨</div>
+  <h3>No open complaints</h3>
+  <p>Everything has been marked resolved, or nothing has been reported yet.</p>
+  <a class="btn secondary" href="{{ url_for('index') }}">See all complaints</a>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-bg auth-hero">
+  <div class="panel auth-card">
+    <h2>Welcome back</h2>
+    <p class="hint">Log in to file complaints or review them.</p>
+    <form method="post" action="{{ url_for('login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="next" value="{{ next }}">
+      <label for="username">Username</label>
+      <input name="username" id="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" autocomplete="current-password" required>
+      <label class="check"><input type="checkbox" id="show_pw"> Show password</label>
+      <button type="submit" class="block">Log in</button>
+    </form>
+    <p class="switch">New here? <a href="{{ url_for('signup') }}">Create an account</a></p>
+  </div>
+</section>
+<script>
+  document.getElementById("show_pw").addEventListener("change", e => {
+    document.getElementById("password").type = e.target.checked ? "text" : "password";
+  });
+</script>
+{% endblock %}

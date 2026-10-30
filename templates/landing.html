@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-bg landing">
+  <div class="landing-text">
+    <span class="eyebrow">Maharashtra · citizen + department</span>
+    <h1>“Resolved” should mean <em>fixed</em>.</h1>
+    <p>Departments mark complaints as resolved, but nobody checks. ClosureCheck asks the citizen for fresh,
+       live proof from the same spot, so a closed complaint is a fixed one.</p>
+    <div class="cta">
+      <a class="btn" href="{{ url_for('login') }}">Log in</a>
+      <a class="btn secondary" href="{{ url_for('signup') }}">Create an account</a>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <article class="how-card"><span class="how-n">1</span><h3>Report with a live photo</h3>
+    <p>Pothole, streetlight, garbage or water problem. Taken with the camera, with your location.</p></article>
+  <article class="how-card"><span class="how-n">2</span><h3>Department marks it resolved</h3>
+    <p>Officers close the complaint, the same as on portals today.</p></article>
+  <article class="how-card"><span class="how-n">3</span><h3>Proof from the same spot</h3>
+    <p>The citizen takes a fresh live photo. ClosureCheck checks the location (photo comparison is coming next).</p></article>
+</section>
+{% endblock %}
