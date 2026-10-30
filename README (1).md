@@ -4,6 +4,10 @@
 
 > "A lie detector for the word *resolved*."
 
+**Live demo:** https://priyanka2007.pythonanywhere.com
+
+Open it on a **phone** for the full citizen flow — filing a complaint needs a live camera and GPS, which a laptop cannot provide. On a laptop you can still browse the complaints list and the department view.
+
 ---
 
 ## The problem
